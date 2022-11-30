@@ -27,18 +27,11 @@ int main(int argc, char** argv, char** envp) {
         printf("%s, ", argv[i]);
     printf("\n");
 
-    // int i = 0;
-    // while(envp[i])
-    //     printf("%s\n", envp[i++]);
-
-    
-
-
     int* array = alloca((argc - 1)*sizeof(int));
     for(int i = 0; i < (argc - 1); i++)
         array[i] = atoi(argv[i + 1]);
 
-    int valor = 1;
+    int valor = 7;
     printf("indice de %d eh %d\n", valor, busca_binaria(array, sizeof(array), valor));
 
     return 0;
