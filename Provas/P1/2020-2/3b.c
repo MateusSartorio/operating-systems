@@ -19,11 +19,11 @@ int main() {
     else {
         pid_t pid = 0;
         int estado = 0;
+        
+        while(wait(&estado) != -1);
 
-        pid = wait(&estado);
+        printf("%d", a);
     }
 
-    printf("%d", a);
-    
     return 0;
 }
