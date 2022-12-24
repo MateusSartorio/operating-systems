@@ -10,8 +10,10 @@
 sem_t semaphore;
 
 void* routine(void* args) {
+    int sem_val;
     sem_wait(&semaphore);
-    printf("Hello from thread %d\n", *((int*)args));
+    sem_getvalue(&semaphore, &sem_val);
+    printf("(%d) Current semaphore value is %d\n", *((int*)args), sem_val);
     sleep(1);
     free(args);
     sem_post(&semaphore);
@@ -20,7 +22,7 @@ void* routine(void* args) {
 int main(int argc, char** argv) {
     pthread_t th[THREAD_NUM];
 
-    sem_init(&semaphore, 0, 3);
+    sem_init(&semaphore, 0, 1);
 
     for(int i = 0; i < THREAD_NUM; i++) {
         int* arg = (int*) malloc(sizeof(int));
