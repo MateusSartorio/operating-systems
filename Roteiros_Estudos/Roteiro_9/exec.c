@@ -16,7 +16,6 @@ int main(int argc, char** argv, char** envp) {
         close(file);
         
         execlp("ping", "ping", "-c", "1", "google.com", NULL);
-        
 
         return 1;
     }
