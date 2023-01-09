@@ -1,5 +1,7 @@
 #include "../headers/executa_prompt.h"
-#include <regex.h>
+#include <stdio.h>
+
+#define QTD_MAX_ARGUMENTOS 5
 
 static void fecha_tudo_e_sai() {
     puts("fechando...");
@@ -14,9 +16,39 @@ static void processo_em_foreground(char* comando) {
     puts("processo em foreground");
 }
 
+static void executa_comando(char* comando) {
+    // Quantidade maxima de argumentos + o proprio nome do programa + NULL para sinalizar fim do vetor + & para executar em background
+    char* argv[QTD_MAX_ARGUMENTOS + 3];
+    
+    int i = 0;
+    char* token = strtok(comando, " ");
+    while(token) {
+    //    printf("%s, ", token);
+        argv[i] = token;
+        i++;
+
+        if(i > 4) {
+            printf("Muitos argumentos passados para programa, maximo eh 3.\n");
+            return;
+        }
+
+        token = strtok(NULL, " ");
+    }
+    argv[i] = "&";
+    argv[i+1] = NULL;
+    
+    execvp(argv[0], argv);
+    
+    
+}
+
 static void cria_nova_secao(char** vetor_comandos) {
     int i = 0;
     char* comando = NULL;
+    while((comando = vetor_comandos[i])) {
+        executa_comando(comando);
+        i++;
+    }
 }
 
 static void libera_vetor_comandos(char** vetor_comandos) {
