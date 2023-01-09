@@ -9,5 +9,6 @@
 #include "executa_prompt.h"
 
 char** processa_prompt(char* prompt);
+void libera_vetor_comandos(char** vetor_comandos);
 
 #endif

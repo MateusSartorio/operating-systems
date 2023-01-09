@@ -7,7 +7,7 @@
 // Não altera a string original
 static char* trim(const char* str) {
     if(!str || strlen(str) == 0) {
-        perror("string nula ou vazia recebida - trim()");
+        perror("String nula ou vazia recebida - trim().\n");
         exit(1);
     }
     
@@ -51,10 +51,7 @@ char** processa_prompt(char* prompt) {
         // Verifica se mais de 5 comandos foram passados
         if(i > 5) {
             printf("Por favor, digite no maximo 5 comandos por vez.\n");
-            
-            // Libera vetor de comandos
-            // LIBERAR VETOR DE COMANDOS AQUI!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+            libera_vetor_comandos(vetor_comandos);
             return NULL;
         }
 
@@ -64,4 +61,16 @@ char** processa_prompt(char* prompt) {
     vetor_comandos[i] = NULL;
 
     return vetor_comandos;
+}
+
+void libera_vetor_comandos(char** vetor_comandos) {
+    if(vetor_comandos == NULL) {
+        printf("Vetor de comandos nulo recebido - libera_vetor_comandos().\n");
+        exit(1);
+    }
+
+    for(int i = 0; vetor_comandos[i] != NULL; i++)
+        free(vetor_comandos[i]);
+
+    free(vetor_comandos);
 }
