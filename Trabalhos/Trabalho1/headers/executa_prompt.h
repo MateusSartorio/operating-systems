@@ -10,6 +10,7 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <errno.h>
+#include <fcntl.h>
 
 void executa_prompt(char** vetor_comandos);
 

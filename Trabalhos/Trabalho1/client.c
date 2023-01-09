@@ -1,6 +1,7 @@
 #include "./headers/recebe_prompt.h"
 #include "headers/executa_prompt.h"
 #include "headers/processa_prompt.h"
+#include <signal.h>
 
 int main(int argc, char** argv, char** envp) { 
     while(1) {
@@ -11,7 +12,6 @@ int main(int argc, char** argv, char** envp) {
             
             if(vetor_comandos) {
                 executa_prompt(vetor_comandos);
-
                 libera_vetor_comandos(vetor_comandos);
             }
 
