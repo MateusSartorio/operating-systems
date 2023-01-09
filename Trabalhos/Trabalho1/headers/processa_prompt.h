@@ -4,9 +4,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <regex.h>
 
-#include "executa.h"
+#include "executa_prompt.h"
 
-void processa_prompt(char* prompt);
+char** processa_prompt(char* prompt);
 
 #endif

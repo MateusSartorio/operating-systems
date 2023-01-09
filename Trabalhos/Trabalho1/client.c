@@ -1,8 +1,6 @@
-#include "./headers/prompt.h"
+#include "./headers/exibe_prompt.h"
 
-int main(int argc, char** argv, char** envp) {
-    
-    exibe_prompt(); 
-
+int main(int argc, char** argv, char** envp) { 
+    exibe_prompt();
     return 0;
 }
