@@ -3,7 +3,15 @@
 #include <stdio.h>
 #include <string.h>
 
-static void fecha_tudo_e_sai(pid_t* buffer_secoes, int* posicao_buffer_secoes) {
+static void fecha_tudo_e_sai(char* comando, pid_t* buffer_secoes, int* posicao_buffer_secoes) {
+    char* token = strtok(comando, " ");
+    token = strtok(NULL, " ");
+
+    if(token) {
+        printf("O comando exit nao pode receber argumentos.\n");
+        return;
+    }
+
     for(int i = 0; i < *posicao_buffer_secoes; i++)
         killpg(buffer_secoes[i], SIGKILL);
 
@@ -30,12 +38,14 @@ static void processo_em_foreground(char* comando) {
     pid_t pid = fork();
     
     if(pid == 0) {
+        /*
         struct sigaction sa;
         sa.sa_handler = SIG_DFL;
         sigfillset(&sa.sa_mask);
         sigaction(SIGINT, &sa, NULL);
         sigaction(SIGQUIT, &sa, NULL);
         sigaction(SIGTSTP, &sa, NULL);
+        */
 
         // Quantidade maxima de argumentos + o proprio nome do programa + NULL para sinalizar fim do vetor
         char* argv[QTD_MAXIMA_ARGUMENTOS + 2];
@@ -117,7 +127,8 @@ static void cria_nova_secao(char vetor_comandos[][TAMANHO_MAXIMO_COMANDO], pid_t
         int qtd_processos = 0;
         while(strcmp(vetor_comandos[qtd_processos], "NULL") != 0)
             qtd_processos++;
-
+        
+            /*
         if(qtd_processos == 1) {
             struct sigaction sa;
             sa.sa_handler = SIG_DFL;
@@ -127,6 +138,7 @@ static void cria_nova_secao(char vetor_comandos[][TAMANHO_MAXIMO_COMANDO], pid_t
             sigaction(SIGTSTP, &sa, NULL);
         }
         else {
+
             struct sigaction sa;
             sa.sa_handler = SIG_DFL;
             sigfillset(&sa.sa_mask);
@@ -134,6 +146,7 @@ static void cria_nova_secao(char vetor_comandos[][TAMANHO_MAXIMO_COMANDO], pid_t
             sigaction(SIGQUIT, &sa, NULL);
             sigaction(SIGTSTP, &sa, NULL);
         }
+        */
 
         int i = 0;
         pid_t pid_comando_individual = 0;
@@ -147,13 +160,7 @@ static void cria_nova_secao(char vetor_comandos[][TAMANHO_MAXIMO_COMANDO], pid_t
         }
         
         int status = 0;
-        while(wait(&status) != -1) {
-            killpg(0, SIGKILL);
-
-            if(WIFEXITED(status))
-                exit(WEXITSTATUS(status));
-        }
-
+        while(wait(&status) != -1) {}
         exit(0);
     }
     else {
@@ -173,18 +180,32 @@ void executa_prompt(char vetor_comandos[][TAMANHO_MAXIMO_COMANDO], pid_t* buffer
     }
 
     // Expressao regular responsavel por identificar se o comando de exit foi passado
-    regex_t exit_regex;
-    int exit_regex_value = regcomp(&exit_regex, "^exit$", 0);
-    if(exit_regex_value) {
-        printf("Problema ao compilar exit_regex.\n");
-        exit(exit_regex_value);
+    regex_t exit_regex_1;
+    int exit_regex_value_1 = regcomp(&exit_regex_1, "^exit$", 0);
+    if(exit_regex_value_1) {
+        printf("Problema ao compilar exit_regex_1.\n");
+        exit(exit_regex_value_1);
     }
 
-    regex_t cd_regex;
-    int cd_regex_value = regcomp(&cd_regex, "^cd ", 0);
-    if(cd_regex_value) {
-        printf("Problema ao compilar cd_regex.\n");
-        exit(cd_regex_value);
+    regex_t exit_regex_2;
+    int exit_regex_value_2 = regcomp(&exit_regex_2, "^exit ", 0);
+    if(exit_regex_value_2) {
+        printf("Problema ao compilar exit_regex_2.\n");
+        exit(exit_regex_value_2);
+    }
+
+    regex_t cd_regex_1;
+    int cd_regex_value_1 = regcomp(&cd_regex_1, "^cd$", 0);
+    if(cd_regex_value_1) {
+        printf("Problema ao compilar cd_regex_1.\n");
+        exit(cd_regex_value_1);
+    }
+
+    regex_t cd_regex_2;
+    int cd_regex_value_2 = regcomp(&cd_regex_2, "^cd ", 0);
+    if(cd_regex_value_2) {
+        printf("Problema ao compilar cd_regex_2.\n");
+        exit(cd_regex_value_2);
     }
 
     bool tem_exit = false, tem_foreground = false, tem_cd = false;
@@ -192,38 +213,42 @@ void executa_prompt(char vetor_comandos[][TAMANHO_MAXIMO_COMANDO], pid_t* buffer
     while(strcmp(vetor_comandos[i], "NULL") != 0) {
         if(!regexec(&foreground_regex, vetor_comandos[i], 0, NULL, 0))
             tem_foreground = true;
-        if(!regexec(&exit_regex, vetor_comandos[i], 0, NULL, 0))
+        if( (regexec(&exit_regex_1, vetor_comandos[i], 0, NULL, 0) == 0) || (regexec(&exit_regex_2, vetor_comandos[i], 0, NULL, 0) == 0) )
             tem_exit = true;
-        if(!regexec(&cd_regex, vetor_comandos[i], 0, NULL, 0))
+        if( (regexec(&cd_regex_1, vetor_comandos[i], 0, NULL, 0) == 0) || (regexec(&cd_regex_2, vetor_comandos[i], 0, NULL, 0) == 0) )
             tem_cd = true;
 
         i++;
     }
 
+    regfree(&foreground_regex);
+    regfree(&exit_regex_1);
+    regfree(&exit_regex_2);
+    regfree(&cd_regex_1);
+    regfree(&cd_regex_2);
+
     if(i > 1 && (tem_exit || tem_foreground || tem_cd))
-        printf("Por favor, a operacao de exit, cd ou comandos com o operador de foreground (%%) devem ser comandos unicos.\n");
+        printf("A operacao de exit, cd ou comandos com o operador de foreground (%%) devem ser comandos unicos.\n");
     else if(tem_exit && tem_foreground)
         printf("A operacao de exit nao pode ser usada junto com o operador de foreground (%%).\n");
     else if(tem_cd && tem_foreground)
         printf("A operacao de cd nao pode ser usada junto com o operador de foreground (%%).\n");
     else if(tem_exit)
-        fecha_tudo_e_sai(buffer_secoes, posicao_buffer_secoes);
+        fecha_tudo_e_sai(vetor_comandos[0], buffer_secoes, posicao_buffer_secoes);
     else if(tem_foreground) {
+        /*
         sigset_t new_set, old_set; 
         
         sigfillset(&new_set);
         sigprocmask(SIG_BLOCK, &new_set, &old_set);
+        */
 
         processo_em_foreground(vetor_comandos[0]);
 
-        sigprocmask(SIG_SETMASK, &old_set, NULL);
+        //sigprocmask(SIG_SETMASK, &old_set, NULL);
     }
     else if(tem_cd)
         troca_diretorio(vetor_comandos[0]);
     else
         cria_nova_secao(vetor_comandos, buffer_secoes, posicao_buffer_secoes); 
-    
-    regfree(&foreground_regex);
-    regfree(&exit_regex);
-    regfree(&cd_regex);
 }

@@ -1,6 +1,6 @@
-#include "./headers/recebe_prompt.h"
-#include "./headers/executa_prompt.h"
-#include "./headers/processa_prompt.h"
+#include "../headers/recebe_prompt.h"
+#include "../headers/executa_prompt.h"
+#include "../headers/processa_prompt.h"
 #include <signal.h>
 #include <stdio.h>
 
@@ -10,12 +10,25 @@ pid_t buffer_secoes[TAMANHO_BUFFER_SECOES];
 int posicao_buffer_secoes = 0;
 
 void handler(int signo) {
-    printf("\nNao adianta me enviar o sinal por Ctrl-... . Estou vacinado!!\n");
+    switch (signo) {
+        case SIGINT:
+            printf("\nNao adianta me enviar o sinal por Ctrl-C. Estou vacinado!!\n");
+            break;
+        case SIGQUIT:
+            printf("\nNao adianta me enviar o sinal por Ctrl-\\. Estou vacinado!!\n");
+            break;
+        case SIGTSTP:
+            printf("\nNao adianta me enviar o sinal por Ctrl-Z. Estou vacinado!!\n");
+            break;
+        default:
+            printf("\nNao deveria ter recebido este sinal aqui (%d) - handler() [main.c]\n", signo);
+    }
 }
 
 int main(int argc, char** argv, char** envp) { 
     struct sigaction sa;
     sa.sa_handler = handler;
+    sa.sa_flags = 0;
     sigfillset(&sa.sa_mask);
     sigaction(SIGINT, &sa, NULL);
     sigaction(SIGQUIT, &sa, NULL);
@@ -30,8 +43,6 @@ int main(int argc, char** argv, char** envp) {
             if(processa_prompt_return_value == 0)
                 executa_prompt(vetor_comandos, buffer_secoes, &posicao_buffer_secoes);
         }
-         
-        
     }
     
     return 0;

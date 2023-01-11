@@ -1,5 +1,5 @@
 all:
-	gcc ./src/*.c main.c -o build
+	gcc ./src/*.c -o build
 
 run: all
 	./build
