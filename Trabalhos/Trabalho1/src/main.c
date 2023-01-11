@@ -1,8 +1,6 @@
 #include "../headers/recebe_prompt.h"
 #include "../headers/executa_prompt.h"
 #include "../headers/processa_prompt.h"
-#include <signal.h>
-#include <stdio.h>
 
 char prompt[TAMANHO_PROMPT];
 char vetor_comandos[QTD_COMANDOS_MAXIMA+1][TAMANHO_MAXIMO_COMANDO];

@@ -2,6 +2,11 @@
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
+
+static void mata_todos_processos_do_grupo(int signo) {
+    killpg(0, SIGKILL);
+}
 
 static void fecha_tudo_e_sai(char* comando, pid_t* buffer_secoes, int* posicao_buffer_secoes) {
     char* token = strtok(comando, " ");
@@ -38,14 +43,18 @@ static void processo_em_foreground(char* comando) {
     pid_t pid = fork();
     
     if(pid == 0) {
-        /*
-        struct sigaction sa;
-        sa.sa_handler = SIG_DFL;
-        sigfillset(&sa.sa_mask);
-        sigaction(SIGINT, &sa, NULL);
-        sigaction(SIGQUIT, &sa, NULL);
-        sigaction(SIGTSTP, &sa, NULL);
-        */
+        struct sigaction new_sa;
+
+        new_sa.sa_handler = SIG_DFL;
+        new_sa.sa_flags = 0;
+        sigfillset(&new_sa.sa_mask);
+        sigaction(SIGINT, &new_sa, NULL);
+        sigaction(SIGQUIT, &new_sa, NULL);
+        sigaction(SIGTSTP, &new_sa, NULL);
+
+        sigaction(SIGINT, &new_sa, NULL);
+        sigaction(SIGQUIT, &new_sa, NULL);
+        sigaction(SIGTSTP, &new_sa, NULL);
 
         // Quantidade maxima de argumentos + o proprio nome do programa + NULL para sinalizar fim do vetor
         char* argv[QTD_MAXIMA_ARGUMENTOS + 2];
@@ -102,7 +111,7 @@ static void executa_comando(char* comando) {
     
     int dev_null = open("/dev/null", O_CREAT | O_WRONLY);
     dup2(dev_null, STDOUT_FILENO);
-    dup2(dev_null, STDERR_FILENO);
+    // dup2(dev_null, STDERR_FILENO);
     execvp(argv[0], argv);
     
     exit(2);
@@ -128,25 +137,22 @@ static void cria_nova_secao(char vetor_comandos[][TAMANHO_MAXIMO_COMANDO], pid_t
         while(strcmp(vetor_comandos[qtd_processos], "NULL") != 0)
             qtd_processos++;
         
-            /*
         if(qtd_processos == 1) {
             struct sigaction sa;
-            sa.sa_handler = SIG_DFL;
+            sa.sa_handler = SIG_IGN;
+            sa.sa_flags = SA_RESTART;
             sigfillset(&sa.sa_mask);
-            sigaction(SIGINT, &sa, NULL);
-            sigaction(SIGQUIT, &sa, NULL);
-            sigaction(SIGTSTP, &sa, NULL);
-        }
-        else {
-
+            sigaction(SIGUSR1, &sa, NULL);
+        } 
+        else if(qtd_processos > 1) {
             struct sigaction sa;
-            sa.sa_handler = SIG_DFL;
+            sa.sa_handler = mata_todos_processos_do_grupo;
+            sa.sa_flags = SA_RESTART;
             sigfillset(&sa.sa_mask);
-            sigaction(SIGINT, &sa, NULL);
-            sigaction(SIGQUIT, &sa, NULL);
-            sigaction(SIGTSTP, &sa, NULL);
+            sigaction(SIGUSR1, &sa, NULL);
         }
-        */
+        else
+            exit(0);
 
         int i = 0;
         pid_t pid_comando_individual = 0;
@@ -160,7 +166,12 @@ static void cria_nova_secao(char vetor_comandos[][TAMANHO_MAXIMO_COMANDO], pid_t
         }
         
         int status = 0;
-        while(wait(&status) != -1) {}
+        while(wait(&status) != -1) {
+            if(WIFSIGNALED(status))
+                if(WTERMSIG(status) == SIGUSR1)
+                    raise(SIGUSR1);
+        }
+
         exit(0);
     }
     else {
@@ -236,16 +247,20 @@ void executa_prompt(char vetor_comandos[][TAMANHO_MAXIMO_COMANDO], pid_t* buffer
     else if(tem_exit)
         fecha_tudo_e_sai(vetor_comandos[0], buffer_secoes, posicao_buffer_secoes);
     else if(tem_foreground) {
-        /*
-        sigset_t new_set, old_set; 
+        struct sigaction new_sa, old_sa;
+
+        new_sa.sa_handler = SIG_IGN;
+        new_sa.sa_flags = SA_RESTART;
+        sigfillset(&new_sa.sa_mask);
+        sigaction(SIGINT, &new_sa, &old_sa);
+        sigaction(SIGQUIT, &new_sa, &old_sa);
+        sigaction(SIGTSTP, &new_sa, &old_sa);
         
-        sigfillset(&new_set);
-        sigprocmask(SIG_BLOCK, &new_set, &old_set);
-        */
-
         processo_em_foreground(vetor_comandos[0]);
-
-        //sigprocmask(SIG_SETMASK, &old_set, NULL);
+        
+        sigaction(SIGINT, &old_sa, NULL);
+        sigaction(SIGQUIT, &old_sa, NULL);
+        sigaction(SIGTSTP, &old_sa, NULL);
     }
     else if(tem_cd)
         troca_diretorio(vetor_comandos[0]);
