@@ -6,9 +6,8 @@
 #include <string.h>
 #include <regex.h>
 
-#include "executa_prompt.h"
+#include "constantes.h"
 
-char** processa_prompt(char* prompt);
-void libera_vetor_comandos(char** vetor_comandos);
+int processa_prompt(char* prompt, char vetor_comandos[][TAMANHO_MAXIMO_COMANDO]);
 
 #endif

@@ -1,17 +1,12 @@
 #include "../headers/recebe_prompt.h"
 #include <stdio.h>
 
-char* recebe_prompt() {
+int recebe_prompt(char* prompt) {
     printf("acsh> ");
-
-    size_t size = 0;
-    char* buffer = NULL;
-    getline(&buffer, &size, stdin);
     
-    if(strcmp(buffer, "\n") == 0) {
-        free(buffer);
-        return NULL;
-    }
+    fgets(prompt, TAMANHO_PROMPT, stdin);
+    if(strcmp(prompt, "\n") == 0)
+        return -1;
 
-    return buffer;
+    return 0;
 }

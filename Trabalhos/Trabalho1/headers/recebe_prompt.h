@@ -3,9 +3,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-#include "./processa_prompt.h"
+#include "constantes.h"
 
-char* recebe_prompt();
+int recebe_prompt(char* prompt);
 
 #endif

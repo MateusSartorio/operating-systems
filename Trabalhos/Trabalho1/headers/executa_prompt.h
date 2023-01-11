@@ -12,6 +12,8 @@
 #include <errno.h>
 #include <fcntl.h>
 
-void executa_prompt(char** vetor_comandos);
+#include "constantes.h"
+
+void executa_prompt(char vetor_comandos[][TAMANHO_MAXIMO_COMANDO], pid_t* buffer_secoes, int* posicao_buffer_secoes);
 
 #endif
