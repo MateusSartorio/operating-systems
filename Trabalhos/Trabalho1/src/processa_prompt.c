@@ -1,5 +1,7 @@
 #include "../headers/processa_prompt.h"
 
+// Mesmo funcionamento da funcao strtok() da biblioteca padrao
+// No entanto, strtok2() so quebra a string str em tokens quando encontra todo o delimitador, ao inves que qualquer um de seus caracteres
 static char* strtok2(char* str, char* delimitador) {
     static bool chegou_no_final = false;
     static char* str_estatica = NULL;
@@ -56,7 +58,7 @@ static char* strtok2(char* str, char* delimitador) {
 }
 
 // Remove espaços em branco no comeco da string e espacoes em branco ou quebra de linha do final
-// Aloca uma string nova na heap e a retorna
+// Copia a string sem espacoes em destino
 // Não altera a string original
 static void trim(char* origem, char* destino) {
     if(!origem || strlen(origem) == 0) {
@@ -78,9 +80,10 @@ static void trim(char* origem, char* destino) {
     destino[k] = '\0';
 }
 
+// Processa a string prompt, e preenche o vetor_comandos com cada um dos comandos individuais
+// O vetor de comandos eh terminado pela string literal "NULL"
+// Retorna -1 caso algo de errado, e 0 caso contrario
 int processa_prompt(char* prompt, char vetor_comandos[][TAMANHO_MAXIMO_COMANDO]) {
-    // Separa os comandos individuais em tokens e os coloca do vetor de comandos
-    // O vetor de comandos eh terminado por NULL
     char* token = strtok2(prompt, "<3");
     int i = 0;
     while(token) {
