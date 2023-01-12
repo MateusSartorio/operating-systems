@@ -20,13 +20,14 @@ void handler(int signo) {
             break;
         default:
             printf("\nNao deveria ter recebido este sinal aqui (%d) - handler() [main.c]\n", signo);
+            exit(1);
     }
 }
 
 int main(int argc, char** argv, char** envp) { 
     struct sigaction sa;
     sa.sa_handler = handler;
-    sa.sa_flags = 0;
+    sa.sa_flags = SA_RESTART;
     sigfillset(&sa.sa_mask);
     sigaction(SIGINT, &sa, NULL);
     sigaction(SIGQUIT, &sa, NULL);
@@ -34,6 +35,8 @@ int main(int argc, char** argv, char** envp) {
     
     while(1) {
         int prompt_return_value = recebe_prompt(prompt);
+
+        // printf("prompt: -%s-", prompt);
         
         if(prompt_return_value == 0) {
             int processa_prompt_return_value = processa_prompt(prompt, vetor_comandos);

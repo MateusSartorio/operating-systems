@@ -4,27 +4,27 @@ CC=gcc
 CFLAGS=-c
 
 # arquivos .c
-C_SOURCE = cliente.c $(wildcard ./src/c/*.c)
+C_SOURCE=$(wildcard ./src/*.c)
 
 # arquivos .h
-H_SOURCE = $(wildcard ./src/h/*.h)
+H_SOURCE=$(wildcard ./headers/*.h)
 
-# arquivos objeto
-OBJ = $(C_SOURCE:.c=.o)
+# arquivos objeto .o
+OBJ=$(C_SOURCE:./src/%.c=./bin/%.o)
 
 all: $(NOME_PROJETO)
 
 $(NOME_PROJETO): $(OBJ)
-	@ $(CC) -o $@ $^
+	$(CC) -o $@ $^
 
-%.o: %.c %.h
-	@ $(CC) $(CFLAGS) $<
+./bin/main.o: ./src/main.c $(H_SOURCE)
+	$(CC) $(CFLAGS) -o $@ $<
 
-cliente.o: cliente.c $(H_SOURCE)
-	@ $(CC) $(CFLAGS) $<
+./bin/%.o: ./src/%.c ./headers/%.h
+	$(CC) $(CFLAGS) -o $@ $<
 
 run:
-	./$(NOME_PROJETO) ./entrada.txt
+	./$(NOME_PROJETO)
 
 clean:
-	rm -rf ./cliente.o ./src/c/*.o $(NOME_PROJETO)
+	rm -f ./bin/*.o $(NOME_PROJETO)

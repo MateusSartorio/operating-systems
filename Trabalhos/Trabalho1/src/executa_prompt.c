@@ -1,8 +1,4 @@
 #include "../headers/executa_prompt.h"
-#include <signal.h>
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
 
 static void mata_todos_processos_do_grupo(int signo) {
     killpg(0, SIGKILL);
@@ -46,12 +42,8 @@ static void processo_em_foreground(char* comando) {
         struct sigaction new_sa;
 
         new_sa.sa_handler = SIG_DFL;
-        new_sa.sa_flags = 0;
+        new_sa.sa_flags = SA_RESTART;
         sigfillset(&new_sa.sa_mask);
-        sigaction(SIGINT, &new_sa, NULL);
-        sigaction(SIGQUIT, &new_sa, NULL);
-        sigaction(SIGTSTP, &new_sa, NULL);
-
         sigaction(SIGINT, &new_sa, NULL);
         sigaction(SIGQUIT, &new_sa, NULL);
         sigaction(SIGTSTP, &new_sa, NULL);
